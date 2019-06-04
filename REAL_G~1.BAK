@@ -3,11 +3,21 @@
 #include <iomanip.h>
 #include <process.h>
 
-struct playarea
+class play_area
 {
- int board[30][30];
- int neighbour[30][30];
-}b;
+ private:
+	int board[31][31];
+	int neighbour[31][31];
+	int board_size;
+	void neighbour_calc();
+
+ public:
+	play_area(int Bsize);
+	void board_with_no();
+	void board_cout();
+	void alive_cell(int r, int c);
+	void next_gen();
+};
 
 void about()
 {
@@ -58,7 +68,22 @@ void delay()
  for(long int w=0;w<10000000;w++); //For Time Delay
 }
 
-void board_num_cout(int board_size)
+play_area:: play_area(int Bsize)
+{
+ int i,j;
+ board_size=Bsize;
+ for(i=0;i<=board_size+2;i++)
+  for(j=0;j<=board_size+2;j++)
+   b.board[i][j]=0;
+ board_with_no();
+}
+
+void play_area:: alive_cell(int r,int c)
+{
+ b.board[r][c]=1;
+}
+
+void play_area:: board_with_no()
 {
  for(int i=0;i<board_size+1;i++)
   {
@@ -70,7 +95,7 @@ void board_num_cout(int board_size)
      cout<<setw(2)<<i;
     else if(i==0 && j==0)
      cout<<setw(2)<<" ";
-    else if(b.board[i][j]==0)
+    else if(board[i][j]==0)
       cout<<setw(2)<<"_";
      else
       cout<<setw(2)<<"*";
@@ -79,82 +104,80 @@ void board_num_cout(int board_size)
   }
 }
 
-void board_cout(int board_size)
+void play_area::board_cout()
 {
  for(int i=1;i<board_size+1;i++)
  {
   for(int j=1;j<board_size+1;j++)
   {
-   if(b.board[i][j]==0)
+   if(board[i][j]==0)
     cout<<setw(2)<<"_";
    else
     cout<<setw(2)<<"*";
-   }
+  }
   cout<<"\n";
  }
 }
 
-void neighbour_calc(int board_size)
+void play_area:: neighbour_calc()
 {
  int p, q;
  for(int i=1;i<board_size+1;i++)
  {
   for(int j=1;j<board_size+1;j++)
   {
-   if(b.board[i][j]==1)
-    b.neighbour[i][j]=-1;
+   if(board[i][j]==1)
+    neighbour[i][j]=-1;
    else
-    b.neighbour[i][j]=0;
+    neighbour[i][j]=0;
    for(p=-1;p<=1;p++)
     {
      for(q=-1;q<=1;q++)
     {
-      b.neighbour[i][j]+=b.board[i+p][j+q];
+      neighbour[i][j]+=board[i+p][j+q];
     }//for(q)
    }//for(p)
   }//for(j)
  }//for(i)
 }
 
-void next_gen(int board_size)
+void play_area:: next_gen()
 {
+ neighbour_calc();
  for(int i=1;i<board_size+1;i++)
  {
   for(int j=1;j<board_size+1;j++)
   {
-   if(b.board[i][j]==1 && (b.neighbour[i][j]>3 || b.neighbour[i][j]<2) )
-    b.board[i][j]=0;
-   else if(b.board[i][j]==0 && b.neighbour[i][j]==3 )
-    b.board[i][j]=1;
-  }
- }
+   if(board[i][j]==1 && (neighbour[i][j]>3 || neighbour[i][j]<2) )
+    board[i][j]=0;
+   else if(board[i][j]==0 && neighbour[i][j]==3 )
+    board[i][j]=1;
+  }//for(i)
+ }//for(j)
 }
 
 void play()
 {
- int BoardSize, r, c, i, j, gen, g;
+ int BoardSize, row, column, i, j, gen, g;
  char continu, control;
  cout<<"\n\t Play CONWAY'S GAME OF LIFE";
  cout<<"\n\nEnter Size of Board:";
  cin>>BoardSize;
+ play_area b(BoardSize);
 
  clrscr();
-
- for(i=0;i<=BoardSize+2;i++)
-  for(j=0;j<=BoardSize+2;j++)
-   b.board[i][j]=0;
-
- board_num_cout(BoardSize);
 
  do
  {
   cout<<"Enter Cell's address to be made alive:";
-  cin>>r>>c;
+  cin>>row>>column;
   cin>>continu;
-  b.board[r][c]=1;
+
+  b.alive_cell(row,column);
+
   clrscr();
 
-  board_num_cout(BoardSize);
+  b.board_with_no();
 
  }while(continu=='y'|| continu=='Y');
 
@@ -179,10 +202,9 @@ void play()
   }
   clrscr();
 
-  neighbour_calc(BoardSize);
-  next_gen(BoardSize);
+  b.next_gen();
   cout<<"GENERATION "<<g+1<<endl;
-  board_cout(BoardSize);
+  b.board_cout();
 
  }//for(gen)
 }
