@@ -108,7 +108,20 @@ void play_area:: next_gen()
 void main()
 {
  clrscr();
- int row, column;
+ ofstream fout;
+ play_area b(25);
+ fout.open("temp.dat",ios::binary,ios::app);
+ ifstream fin;
+ fin.open("patterns.dat",ios::binary);
+ for(int i=0; i<5; i++)
+  {
+   fin.seekg(i*sizeof(b));
+   fin.read((char*)&b, sizeof(b));
+   fout.write((char*)&b, sizeof(b));
+  }
+ fin.close();
+ fout.close();
+/* int row, column;
  char continu;
  play_area b(20);
  b.board_with_no();
@@ -129,6 +142,6 @@ void main()
  ofstream fout;
  fout.open("patterns.dat", ios::app | ios::binary);
  fout.write((char*)&b,sizeof(b));
- cout<<"File has been written.";
+ cout<<"File has been written."; */
  getch();
 }

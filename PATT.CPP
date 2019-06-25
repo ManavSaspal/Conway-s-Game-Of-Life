@@ -108,6 +108,19 @@ void play_area:: next_gen()
 void main()
 {
  clrscr();
+ /*ofstream fout;
+ play_area b(25);
+ fout.open("temp.dat",ios::binary,ios::app);
+ ifstream fin;
+ fin.open("patterns.dat",ios::binary);
+ for(int i=0; i<5; i++)
+  {
+   fin.seekg(i*sizeof(b));
+   fin.read((char*)&b, sizeof(b));
+   fout.write((char*)&b, sizeof(b));
+  }
+ fin.close();
+ fout.close();*/
  int row, column;
  char continu;
  play_area b(20);

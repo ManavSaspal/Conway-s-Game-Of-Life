@@ -1,9 +1,11 @@
-#include <iostream.h>
 #include <fstream.h>
 #include <conio.h>
 #include <iomanip.h>
 #include <process.h>
 #include <stdio.h>
+
+char live[4]={176, 223, 176 };    //dotted box = 176
+char dead[4]={176, 176, 176 };    //solid box  = 223
 
 void about();                     //prints 'about' page
 void rules();                     //prints 'rules' page
@@ -20,13 +22,13 @@ class play_area
 	void neighbour_calc();               //calculates neighbours
 
  public:
-	play_area(int Bsize);                //creates board initially
+	play_area();                         //creates board initially
 	void board_with_no();                //prints Board with row and column nos.
 	void board_cout();                   //prints Board without row and column nos.
 	void alive_cell(int r, int c);       //makes cell alive
 	void next_gen();                     //decides the next gen.
-	void gen_mode();                     //for no. of gen. and mode of control
-}b(20);
+	void gen();                          //for no. of gen. and mode of control
+}b;
 
 
 
@@ -37,7 +39,7 @@ void play()
 
  cout<<"\n\t Play CONWAY'S GAME OF LIFE\n\n";
  cout<<"1. New Game?                               {'n'}\n";
- cout<<"2. Load Saved Game?                        {'l'}\n";
+ cout<<"2. Load Saved Game?                        {'s'}\n";
  cout<<"3. Play with pre-loaded patterns?          {'p'}\n";
  cout<<"Enter Choice: ";
  mode=getch();
@@ -46,10 +48,6 @@ void play()
   case '1':
   case 'n':
   case 'N':clrscr();
-	   cout<<"\n\nEnter Size of Board:";
-	   cin>>BoardSize;
-	   play_area b(BoardSize);
-	   clrscr();
 
 	   b.board_with_no();
 
@@ -66,13 +64,28 @@ void play()
 	    b.board_with_no();
 
 	   }while(continu=='y'|| continu=='Y');
-	   b.gen_mode();
+	   b.gen();
+	   getch();
+
+	   clrscr();
+	   cout<<"Do You want to save the current state {'y'/'n'}? ";
+	   cin>>continu;
+	   if(continu=='y' || continu=='Y')
+	   {
+	    clrscr();
+	    char file[35];
+	    cout<<"Enter Name of File (put '.dat' extension at the end):";
+	    gets(file);
+	    ofstream f1;
+	    f1.open(file, ios::out | ios::binary);
+	    f1.write((char*)&b, sizeof(b));
+	   }
 	   break;
 
   case '2':
   case 's':
   case 'S':clrscr();
-	   char file[30];
+	   char file[35];
 	   cout<<"Enter Name of saved File:";
 	   gets(file);
 	   ifstream f1;
@@ -83,7 +96,7 @@ void play()
 	   {
 	    f1.read((char*)&b, sizeof(b));
 	    b.board_with_no();
-	    b.gen_mode();
+	    b.gen();
 	   }
 
 	   break;
@@ -107,16 +120,17 @@ void play()
 	    cout<<"3. Exploder\n";
 	    cout<<"4. Lightweight Spaceship\n";
 	    cout<<"5. Tumbler\n";
+	    cout<<"6. 10 Cell Row\n";
 	    cout<<"\nEnter Number of Pattern:";
 	    cin>>n;
 	    clrscr();
-	    if(n>=1 && n<=5)
+	    if(n>=1 && n<=6)
 	    {
 	     f2.seekg(sizeof(b)*(n-1), ios::beg); //moves the cursor to the beginning of nth record
 	     f2.read((char*)&b, sizeof(b));
 	     b.board_with_no();
 	     getch();
-	     b.gen_mode();
+	     b.gen();
 	    }
 	    else
 	     cout<<"Invalid Code!";
@@ -131,7 +145,7 @@ void play()
  }
 
 }
-void play_area::gen_mode()
+void play_area::gen()
 {
  int gen, g;
  char control;
@@ -180,24 +194,30 @@ void main()
      choice=getch();
      switch(choice)
      {
+      case '1':
       case 'a':
       case 'A':clrscr();
 	       about();
 	       break;
+      case '2':
       case 'r':
       case 'R':clrscr();
 	       rules();
-	       break;
+
+		 break;
+      case '3':
       case 'i':
       case 'I':clrscr();
 	       instructions();
 	       break;
+      case '4':
       case 13 :clrscr();         // 'Enter'=13
 	       play();
 	       break;
-      case 27 :exit(0);          //'Esc'=27
+      case '5':
+      case 27 :exit(0);          //'Esc'   =27
 	       break;
-       default:cout<<"\nInvalid Choice";
+      default :cout<<"\nInvalid Choice";
 	       cout<<"\nEnter Choice Again:";
 	       goto label1;
  }
@@ -220,10 +240,10 @@ void main()
 
 //play_area's Function Definitons
 
-play_area:: play_area(int Bsize)
+play_area:: play_area()
 {
  int i,j;
- board_size=Bsize;
+ board_size=20;
  for(i=0;i<=board_size+2;i++)
   for(j=0;j<=board_size+2;j++)
    board[i][j]=0;
@@ -247,12 +267,12 @@ void play_area:: board_with_no()
     else if(i==0 && j==0)
      cout<<setw(3)<<" ";
     else if(board[i][j]==0)
-      cout<<setw(3)<<" ";
+      cout<<setw(3)<<dead;
      else
-      cout<<setw(3)<<"*";
-   }
+      cout<<setw(3)<<live;
+   }//for(j)
    cout<<"\n";
-  }
+  }//for(i)
 }
 
 void play_area::board_cout()
@@ -262,12 +282,12 @@ void play_area::board_cout()
   for(int j=1;j<board_size+1;j++)
   {
    if(board[i][j]==0)
-    cout<<setw(2)<<" ";
+    cout<<setw(3)<<dead;
    else
-    cout<<setw(2)<<"*";
-  }
+    cout<<setw(3)<<live;
+  }//for(j)
   cout<<"\n";
- }
+ }//for(i)
 }
 
 void play_area:: neighbour_calc()
@@ -319,7 +339,7 @@ void about()
  cout<<"\n This game became widely known when it was mentioned in an article published by Scientific American in 1970. ";
  cout<<" It consists of a collection of cells which, based on a few mathematical rules, can live, die or multiply. ";
  cout<<" Depending on the initial conditions, the cells form various patterns throughout the course of the game. ";
- cout<<"\n\n The game is a zero-player game, meaning that its evolution is determined by its initial state, requiring no further input.";
+ cout<<"\n The game is a zero-player game, meaning that its evolution is determined by its initial state, requiring no further input.";
  cout<<" One interacts with the Game of Life by creating an initial configuration and observing how it evolves, or, for advanced players, by creating patterns with particular properties.";
  cout<<" \nThis is just a simple simulation, made by me, of a piece of art made by John Conway.";
  cout<<" \n\nOne can see its better simulation at https://playgameoflife.com/";
@@ -340,19 +360,21 @@ void rules()
 
 void instructions()
 {
- cout<<"\n\t INSTRUCTIONS";
+ cout<<"\n\t INSTRUCTIONS For NEW GAME";
 
- cout<<"\n The Size of the Board can be modified (Maximum Size 30 x 30) while the board will always be a square grid of cells.";
- cout<<"\n One can easily make cells alive at the initiation just by specifying the address of the cell followed by 'y' (For yes) if another cell is to be made alive or by 'n' (For no) if no other cell is to be made alive.";
+ cout<<"\n\n The Size of the Board will always be a square grid of 20 cells.";
+ cout<<" One can easily make cells alive at the initiation just by specifying the address of the cell followed by 'y' (For yes) if another cell is to be made alive or by 'n' (For no) if no other cell is to be made alive.";
  cout<<"\n In the following way:";
 
  cout<<"\n\n (Row Number) (Column Number) ('y' or 'n')";
- cout<<"\n To be noticed that all three of the separated by a space and then enter is to be pressed.";
+ cout<<"\n To be noted that all three of them separated by a space and then enter is to be pressed.";
 
  cout<<"\n\n Then, number of generations to be formed is specified and then the mode of control which are:";
- cout<<"\n 1.   AUTOMATIC                  [Next generation will be shown automatically after a short interval of time]    {‘a’}";
- cout<<"\n 2.   MANUAL KEYBOARD CONTROL    [Next generation will be showed after getting any key stroke]                   {‘k’}";
- cout<<"\n\n Then just sit back and watch your people populate and die as if you are the god.";
+ cout<<"\n 1.   AUTOMATIC                 [Next gen. automatically]                 {'a'}";
+ cout<<"\n 2.   MANUAL KEYBOARD CONTROL   [Next gen. after getting any key stroke]  {'k'}";
+ cout<<"\n\nThen just sit back and watch your people populate and die as if you are the god.";
+
+ cout<<"\nThen, save the last state of the board if you want to by specifying the file name followed by extension name i.e. '.dat'.";
 }
 
 void delay()
